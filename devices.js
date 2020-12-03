@@ -2002,6 +2002,35 @@ const devices = [
         },
     },
     {
+        fingerprint: [{modelID: 'TS0014', manufacturerName: '_TZ3000_jr2atpww'}],
+        model: 'TS0014',
+        vendor: 'TuYa',
+        description: 'Smart light switch - 4 gang without neutral wire',
+        extend: generic.switch,
+        exposes: [
+            e.switch().withEndpoint('l1'), e.switch().withEndpoint('l2'),
+            e.switch().withEndpoint('l3'), e.switch().withEndpoint('l4'),
+        ],
+        endpoint: (device) => {
+            return {'l1': 1, 'l2': 2, 'l3': 3, 'l4': 4};
+        },
+        whiteLabel: [
+            {vendor: 'TUYATEC', model: 'GDKES-04TZXD'},
+        ],
+        meta: {configureKey: 2, multiEndpoint: true},
+        configure: async (device, coordinatorEndpoint) => {
+            try {
+                for (const ID of [1, 2, 3, 4]) {
+                    const endpoint = device.getEndpoint(ID);
+                    await bind(endpoint, coordinatorEndpoint, ['genOnOff']);
+                    await configureReporting.onOff(endpoint);
+                }
+            } catch (e) {
+                // Fails for some: https://github.com/Koenkk/zigbee2mqtt/issues/4872
+            }
+        },
+    },
+    {
         zigbeeModel: ['gq8b1uv'],
         model: 'gq8b1uv',
         vendor: 'TuYa',
@@ -3578,6 +3607,15 @@ const devices = [
         ota: ota.zigbeeOTA,
     },
     {
+        zigbeeModel: ['1745930P7'],
+        model: '1745930P7',
+        vendor: 'Philips',
+        description: 'Hue outdoor Impress wall lamp (low voltage)',
+        meta: {turnsOffAtBrightness1: true},
+        extend: hue.light_onoff_brightness_colortemp_colorxy,
+        ota: ota.zigbeeOTA,
+    },
+    {
         zigbeeModel: ['1743230P7'],
         model: '1743230P7',
         vendor: 'Philips',
@@ -3618,6 +3656,15 @@ const devices = [
         model: '4080148P9',
         vendor: 'Philips',
         description: 'Hue Signe table light',
+        meta: {turnsOffAtBrightness1: true},
+        extend: hue.light_onoff_brightness_colortemp_colorxy,
+        ota: ota.zigbeeOTA,
+    },
+    {
+        zigbeeModel: ['5060730P7_01', '5060730P7_02', '5060730P7_03', '5060730P7_04', '5060730P7_05'],
+        model: '5060730P7',
+        vendor: 'Philips',
+        description: 'Hue Bluetooth White & Color Ambiance spot Centris',
         meta: {turnsOffAtBrightness1: true},
         extend: hue.light_onoff_brightness_colortemp_colorxy,
         ota: ota.zigbeeOTA,
@@ -6794,11 +6841,6 @@ const devices = [
                 {ID: 11, profileID: 49246, deviceID: 528, inputClusters: [0, 3, 4, 5, 6, 8, 768], outputClusters: []},
                 {ID: 13, profileID: 49246, deviceID: 57694, inputClusters: [4096], outputClusters: [4096]},
             ]},
-            {type: 'Router', manufacturerName: 'GLEDOPTO', modelID: 'GL-C-007', endpoints: [
-                {ID: 11, profileID: 49246, deviceID: 528, inputClusters: [0, 3, 4, 5, 6, 8, 768], outputClusters: []},
-                {ID: 12, profileID: 260, deviceID: 258, inputClusters: [0, 3, 4, 5, 6, 8, 768], outputClusters: []},
-                {ID: 13, profileID: 49246, deviceID: 57694, inputClusters: [4096], outputClusters: [4096]},
-            ]},
         ],
         model: 'GL-C-007-2ID', // 2 ID controls white and color separate
         vendor: 'Gledopto',
@@ -6919,6 +6961,13 @@ const devices = [
         description: 'Zigbee USB mini LED controller RGB + CCT',
         extend: gledopto.light_onoff_brightness_colortemp_colorxy,
         meta: {disableDefaultResponse: true},
+    },
+    {
+        zigbeeModel: ['GL-MC-001P'],
+        model: 'GL-MC-001P',
+        vendor: 'Gledopto',
+        description: 'Zigbee USB mini LED controller RGB + CCT PRO',
+        extend: gledopto.light_onoff_brightness_colortemp_colorxy,
     },
     {
         zigbeeModel: ['GL-S-004Z'],
@@ -7198,18 +7247,25 @@ const devices = [
 
     // YSRSAI
     {
-        zigbeeModel: ['ZB-CL01', 'ZB-CL03', 'FB56-ZCW20FB1.2', 'ZB-DL01'],
-        model: 'YSR-MINI-01',
+        zigbeeModel: ['ZB-CL01', 'ZB-CL03', 'FB56-ZCW20FB1.2'],
+        model: 'YSR-MINI-01_rgbcct',
         vendor: 'YSRSAI',
         description: 'Zigbee LED controller (RGB+CCT)',
         extend: generic.light_onoff_brightness_colortemp_colorxy,
     },
     {
         zigbeeModel: ['ZB-CT01'],
-        model: 'ZB-CT01',
+        model: 'YSR-MINI-01_wwcw',
         vendor: 'YSRSAI',
         description: 'Zigbee LED controller (WW/CW)',
         extend: generic.light_onoff_brightness_colortemp_colorxy,
+    },
+    {
+        zigbeeModel: ['ZB-DL01'],
+        model: 'YSR-MINI-01_dimmer',
+        vendor: 'YSRSAI',
+        description: 'Zigbee LED controller (Dimmer)',
+        extend: generic.light_onoff_brightness,
     },
 
     // Somgoms
@@ -9673,6 +9729,7 @@ const devices = [
         model: 'ICZB-KPD14S',
         vendor: 'iCasa',
         description: 'Zigbee 3.0 Keypad Pulse 4S',
+        meta: {battery: {dontDividePercentage: true}},
         fromZigbee: [
             fz.command_recall, fz.legacy_scenes_recall_click, fz.command_on, fz.legacy_genOnOff_cmdOn, fz.command_off,
             fz.legacy_genOnOff_cmdOff, fz.battery, fz.legacy_cmd_move_with_onoff, fz.legacy_cmd_stop_with_onoff,
@@ -9685,6 +9742,7 @@ const devices = [
         model: 'ICZB-KPD18S',
         vendor: 'iCasa',
         description: 'Zigbee 3.0 Keypad Pulse 8S',
+        meta: {battery: {dontDividePercentage: true}},
         fromZigbee: [
             fz.command_recall, fz.legacy_scenes_recall_click, fz.command_on, fz.legacy_genOnOff_cmdOn, fz.command_off,
             fz.legacy_genOnOff_cmdOff, fz.battery, fz.legacy_cmd_move_with_onoff, fz.legacy_cmd_stop_with_onoff,
@@ -15225,19 +15283,19 @@ const devices = [
         exposes: [e.battery(), e.occupancy(), e.battery_low(), e.tamper()],
     },
 
-    // Silvercrest
+    // Lidl
     {
         fingerprint: [{modelID: 'TS011F', manufacturerName: '_TZ3000_kdi2o9m6'}],
         model: 'HG06337',
-        vendor: 'Silvercrest',
-        description: 'Smart Plug',
+        vendor: 'Lidl',
+        description: 'Silvercrest smart plug',
         extend: generic.switch,
     },
     {
         fingerprint: [{modelID: 'TY0202', manufacturerName: '_TZ1800_fcdjzz3s'}],
         model: 'HG06335',
-        vendor: 'Silvercrest',
-        description: 'Smart motion sensor',
+        vendor: 'Lidl',
+        description: 'Silvercrest smart motion sensor',
         fromZigbee: [fz.ias_occupancy_alarm_1, fz.battery],
         toZigbee: [],
         exposes: [e.occupancy(), e.battery_low(), e.tamper(), e.battery()],
@@ -15250,8 +15308,8 @@ const devices = [
     {
         fingerprint: [{modelID: 'TY0203', manufacturerName: '_TZ1800_ejwkn2h2'}],
         model: 'HG06336',
-        vendor: 'Silvercrest',
-        description: 'Smart window and door sensor',
+        vendor: 'Lidl',
+        description: 'Silvercrest smart window and door sensor',
         fromZigbee: [fz.ias_contact_alarm_1, fz.ias_contact_alarm_1_report, fz.battery],
         toZigbee: [],
         exposes: [e.contact(), e.battery_low(), e.tamper(), e.battery()],
@@ -15264,8 +15322,8 @@ const devices = [
     {
         fingerprint: [{modelID: 'TS1001', manufacturerName: '_TYZB01_bngwdjsr'}],
         model: 'FB20-002',
-        vendor: 'Silvercrest',
-        description: 'Switch and dimming light remote control',
+        vendor: 'Lidl',
+        description: 'Livarno Lux switch and dimming light remote control',
         exposes: [e.action([
             'on', 'off', 'brightness_stop', 'brightenss_step_up', 'brightness_step_down', 'brightness_move_up',
             'brightness_move_down',
@@ -15280,8 +15338,8 @@ const devices = [
             {modelID: 'TS011F', manufacturerName: '_TZ3000_4uf3d0ax'}, // Type J plug & socket
         ],
         model: 'HG06338',
-        vendor: 'Silvercrest',
-        description: '3 gang switch, possibly with USB',
+        vendor: 'Lidl',
+        description: 'Silvercrest 3 gang switch, possibly with USB',
         exposes: [e.switch().withEndpoint('l1'), e.switch().withEndpoint('l2'), e.switch().withEndpoint('l3')],
         extend: generic.switch,
         meta: {configureKey: 1, multiEndpoint: true},
@@ -15297,19 +15355,40 @@ const devices = [
     {
         fingerprint: [{modelID: 'TS0505A', manufacturerName: '_TZ3000_riwp3k79'}],
         model: 'HG06104A',
-        vendor: 'Silvercrest',
-        description: 'Smart LED light strip 2M',
+        vendor: 'Lidl',
+        description: 'Livarno Lux smart LED light strip 2.5m',
         extend: generic.light_onoff_brightness_colortemp_colorxy,
         meta: {applyRedFix: true},
     },
     {
         fingerprint: [{modelID: 'TS0601', manufacturerName: '_TZE200_s8gkrkxk'}],
         model: 'HG06467',
-        vendor: 'Silvercrest',
-        description: 'Smart LED string lights',
+        vendor: 'Lidl',
+        description: 'Melinera smart LED string lights',
         toZigbee: [tz.on_off, tz.silvercrest_smart_led_string],
         fromZigbee: [fz.on_off, fz.silvercrest_smart_led_string],
         exposes: [e.light_brightness_colorhs()],
+    },
+    {
+        fingerprint: [{modelID: 'TS0505A', manufacturerName: '_TZ3000_odygigth'}],
+        model: 'HG06106B',
+        vendor: 'Lidl',
+        description: 'Livarno Lux E14 candle RGB',
+        extend: generic.light_onoff_brightness_colortemp_colorxy,
+    },
+    {
+        fingerprint: [{modelID: 'TS0505A', manufacturerName: '_TZ3000_kdpxju99'}],
+        model: 'HG06106A',
+        vendor: 'Lidl',
+        description: 'Livarno Lux GU10 spot RGB',
+        extend: generic.light_onoff_brightness_colortemp_colorxy,
+    },
+    {
+        fingerprint: [{modelID: 'TS0505A', manufacturerName: '_TZ3000_dbou1ap4'}],
+        model: 'HG06106C',
+        vendor: 'Lidl',
+        description: 'Livarno Lux E27 bulb RGB',
+        extend: generic.light_onoff_brightness_colortemp_colorxy,
     },
 
     // LightSolutions
